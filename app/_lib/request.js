@@ -1,6 +1,6 @@
 import { handleResponse } from '@/app/_lib/auth/syncSession'
 
-const baseUrl = process.env.NEXT_PUBLIC_SERVER_API
+const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 
 export async function requestGet(endpoint) {
     try {
