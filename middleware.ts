@@ -1,33 +1,46 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import jwt from "jsonwebtoken"
 
-// Specify protected and public routes
 const publicRoutes = [
-    '/',
-    '/auth',
-    '/public',
-    '/contactus',
-    '/favicon.ico',
-    '/manifest.json',
+    "/",
+    "/api",
+    "/auth",
+    "/public",
+    "/contactus",
+    "/favicon.ico",
+    "/manifest.json",
 ]
 
-export default async function middleware(req) {
+export default async function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname
-    const isPublicRoute =
-        publicRoutes.includes(path) || path.startsWith('/products/')
 
-    const token = (await cookies()).get('session')?.value
+    const isPublicRoute = publicRoutes.includes(path) || path.startsWith("/products/")
 
-    if (!isPublicRoute && (token !== 'true')) {
-        const redirectUrl = new URL('/auth', req.nextUrl)
-        redirectUrl.searchParams.set('callbackPath', encodeURI(path))
+    if (isPublicRoute) {
+        return NextResponse.next()
+    }
+
+    const token =
+        req.cookies.get("access_token")?.value ||
+        req.headers.get("Authorization")?.replace("Bearer ", "")
+
+    if (!token) {
+        const redirectUrl = new URL("/auth", req.nextUrl)
+        redirectUrl.searchParams.set("callbackPath", encodeURIComponent(path))
         return NextResponse.redirect(redirectUrl)
     }
 
-    return NextResponse.next()
+    try {
+        jwt.verify(token, process.env.JWT_PRIVATE_KEY!)
+        return NextResponse.next()
+    } catch (err) {
+        const redirectUrl = new URL("/auth", req.nextUrl)
+        redirectUrl.searchParams.set("callbackPath", encodeURIComponent(path))
+        return NextResponse.redirect(redirectUrl)
+    }
 }
 
-// Routes Middleware should not run on
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+    matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
 }

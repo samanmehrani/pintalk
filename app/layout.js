@@ -2,14 +2,10 @@ import "@/app/_ui/globals.css"
 
 import * as texts from '@/app/_text/common.js'
 
-import { Vazirmatn } from 'next/font/google'
-import ClientLayout from './layoutClient'
+import { connectMongo } from "@/lib/config/mongoose"
 
-const vazirmatn = Vazirmatn({
-  variable: "--font-vazirmatn",
-  subsets: ["arabic"],
-  display: "swap",
-})
+// import { vazirmatn } from "./fonts"
+import ClientLayout from './layoutClient'
 
 export const metadata = {
   title: texts.websiteTitle,
@@ -27,7 +23,8 @@ export const viewport = {
   interactiveWidget: "resizes-content",
 }
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  await connectMongo()
   return (
     <html lang="en">
       <head>
@@ -36,7 +33,9 @@ export default function RootLayout({ children }) {
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={vazirmatn.variable}>
+      <body
+      // className={vazirmatn.variable}
+      >
         <ClientLayout>
           {children}
         </ClientLayout>
