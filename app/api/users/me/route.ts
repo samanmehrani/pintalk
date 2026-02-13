@@ -5,7 +5,7 @@ import { auth } from "../../../../lib/middlewares/auth"
 export const GET = auth(async (req) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
+      where: { id: req.user.id },
     })
 
     if (!user) {

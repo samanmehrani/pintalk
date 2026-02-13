@@ -15,7 +15,6 @@ export async function GET(
       select: {
         name: true,
         username: true,
-        coverPicture: true,
         profilePicture: true,
         userType: true,
         founded: true,

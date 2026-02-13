@@ -60,7 +60,7 @@ export default function Requests() {
   }
 
   const handleDelete = (requestId) => {
-    setUsersRequests((prev) => prev.filter(item => item._id !== requestId))
+    setUsersRequests((prev) => prev.filter(item => item.id !== requestId))
   }
 
   return (

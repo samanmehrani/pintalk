@@ -73,7 +73,7 @@ export default function Product() {
       <>
         <Header title={'Product'} Icon={ArchiveBoxIcon} />
 
-        <div role="status" className='flex justify-center items-center h-screen'>
+        <div role="status" className='flex justify-center items-center h-[85vh]'>
           <CircleLoader />
         </div>
       </>

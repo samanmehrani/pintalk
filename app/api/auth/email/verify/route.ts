@@ -1,11 +1,10 @@
 import prisma from "../../../../../lib/prisma"
 import { NextRequest, NextResponse } from "next/server"
 
-import { accessToken } from "../../../../../lib/config/env"
-
-import { signAccessToken } from "../../../../../lib/helpers/jwt"
 import { generateEmailSecret } from "../../../../../lib/helpers/emailVerification"
 import { isMoreThanOneMinute } from "../../../../../lib/helpers/timeComparison"
+import { accessToken } from "../../../../../lib/config/env"
+import { signAccessToken } from "../../../../../lib/helpers/jwt"
 
 type VerifyRequestBody = {
   email: string

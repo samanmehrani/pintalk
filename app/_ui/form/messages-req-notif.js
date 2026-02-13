@@ -32,7 +32,7 @@ export default function MessageReqNotif({ type, notification, handleDelete }) {
             <Dropdown
               size="6"
               color='Dropdown'
-              requestId={notification._id}
+              requestId={notification.id}
               onDelete={handleDelete}
             />
           </div>

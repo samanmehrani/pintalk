@@ -163,7 +163,7 @@ export default function ExploreTimeline() {
   }
 
   const handleDelete = (postId) => {
-    setPosts((prev) => prev.filter(item => item.type !== 'post' || item.data._id !== postId))
+    setPosts((prev) => prev.filter(item => item.type !== 'post' || item.data.id !== postId))
   }
 
   const { showNavbar } = useScrollDirection({
@@ -246,7 +246,7 @@ export default function ExploreTimeline() {
                   if (item.type === 'post') {
                     return (
                       <motion.div
-                        key={item.data._id}
+                        key={item.data.id}
                         initial={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.25 }}

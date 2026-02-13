@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import prisma from "../../../../../lib/prisma"
+import prisma from "../../../../lib/prisma"
 
 interface GetProductsParams {
   params: { userId: string }
@@ -10,6 +10,9 @@ export async function GET(
   _: Request,
   { params, searchParams }: GetProductsParams
 ) {
+
+  console.log({ userID: params.userId })
+
   try {
     const page = Number(searchParams.get("page") || "1")
     const limit = 12

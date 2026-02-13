@@ -70,18 +70,18 @@ export default function ProductQuickview({ product, handleDelete, open, setOpen 
                         size="7"
                         color="white"
                         setOpen={setOpen}
-                        productId={product._id}
+                        productId={product.id}
                         onDelete={handleDelete}
                       />
                     )}
                   </div>
 
-                  <p className="text-3xl font-semibold text-indigo-300 drop-shadow-lg mb-20">
+                  <p className="text-3xl font-semibold text-indigo-300 drop-shadow-lg mb-10">
                     {product.currency} {product.price}
                   </p>
 
                   <Link
-                    href={'/products/' + window.btoa(product._id)}
+                    href={'/products/' + window.btoa(product.id)}
                     className="inline-block text-center py-2 px-4 bg-indigo-600 lg:hover:bg-indigo-700 active:bg-indigo-700 text-white rounded-3xl font-medium transition"
                   >
                     View Full Details

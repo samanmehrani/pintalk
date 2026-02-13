@@ -35,7 +35,7 @@ export default function Post({ post, onDelete }) {
               <Dropdown
                 size="6"
                 color="foreground"
-                postId={post._id}
+                postId={post.id}
                 onDelete={onDelete}
               />
             }

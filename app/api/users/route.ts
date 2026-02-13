@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import { cookies } from "next/headers"
 import jwt from "jsonwebtoken"
 import prisma from "../../../lib/prisma"
 import { accessToken } from "../../../lib/config/env"
@@ -12,25 +11,34 @@ const upload = createUploader("brok_avatars")
 export async function POST(req: NextRequest) {
   try {
     const { secret, name, username, userType } = await req.json()
-    const { email } = jwt.verify(
-      secret,
-      process.env.EMAIL_VERIFICATION_SECRET!
-    ) as { email: string }
+
+    const emailSecret = process.env.EMAIL_VERIFICATION_SECRET
+    const jwtSecret = process.env.JWT_SECRET
+
+    if (!emailSecret || !jwtSecret) {
+      throw new Error("Missing environment secrets")
+    }
+
+    const { email } = jwt.verify(secret, emailSecret) as { email: string }
 
     const user = await prisma.user.create({
       data: { name, username, userType, email },
     })
 
-    // ⚡ JWT generation – اگر همچنان تابع generateAuthToken موجود باشد
-    const token = user.generateAuthToken?.() || ""
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      jwtSecret,
+      { expiresIn: "7d" }
+    )
 
     const res = NextResponse.json(user, { status: 201 })
+
     res.cookies.set(accessToken.name, token, accessToken.options)
     res.headers.set("Authorization", token)
 
     return res
   } catch (error) {
-    console.error("Error in /api/auth POST:", error)
+    console.error("Error in /api/users POST:", error)
     return NextResponse.json({ message: "Invalid secret." }, { status: 400 })
   }
 }
@@ -41,7 +49,7 @@ export const PUT = auth(async (req: NextRequest & { user: JwtPayload }) => {
     const formData = await req.formData()
 
     const updatedUser = await prisma.user.update({
-      where: { id: req.user._id },
+      where: { id: req.user.id },
       data: {
         name: formData.get("name") as string | null,
         founded: formData.get("founded") as string | null,
@@ -70,7 +78,7 @@ export const DELETE = auth(async (req: NextRequest & { user: JwtPayload }) => {
     }
 
     const deletedUser = await prisma.user.delete({
-      where: { id: req.user._id },
+      where: { id: req.user.id },
     })
 
     return NextResponse.json(null, { status: 200 })

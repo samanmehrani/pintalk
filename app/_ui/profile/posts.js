@@ -62,7 +62,7 @@ export default function PostsTab({ user }) {
   }
 
   const handleDelete = (postId) => {
-    setPosts(prev => prev.filter(p => p._id !== postId))
+    setPosts(prev => prev.filter(p => p.id !== postId))
   }
 
   return (
@@ -86,7 +86,7 @@ export default function PostsTab({ user }) {
             <AnimatePresence>
               {posts.map((post) => (
                 <motion.div
-                  key={post?._id}
+                  key={post?.id}
                   initial={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.25 }}

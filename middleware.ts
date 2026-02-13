@@ -4,18 +4,17 @@ import jwt from "jsonwebtoken"
 
 const publicRoutes = [
     "/",
-    "/api",
     "/auth",
-    "/public",
     "/contactus",
-    "/favicon.ico",
     "/manifest.json",
 ]
 
-export default async function middleware(req: NextRequest) {
+export default function middleware(req: NextRequest) {
     const path = req.nextUrl.pathname
 
-    const isPublicRoute = publicRoutes.includes(path) || path.startsWith("/products/")
+    const isPublicRoute =
+        publicRoutes.some(route => path.startsWith(route)) ||
+        path.startsWith("/products/")
 
     if (isPublicRoute) {
         return NextResponse.next()
@@ -26,21 +25,30 @@ export default async function middleware(req: NextRequest) {
         req.headers.get("Authorization")?.replace("Bearer ", "")
 
     if (!token) {
-        const redirectUrl = new URL("/auth", req.nextUrl)
-        redirectUrl.searchParams.set("callbackPath", encodeURIComponent(path))
-        return NextResponse.redirect(redirectUrl)
+        return redirectToAuth(req, path)
+    }
+
+    const jwtSecret = process.env.JWT_SECRET
+
+    if (!jwtSecret) {
+        console.error("JWT_SECRET is not defined")
+        return redirectToAuth(req, path)
     }
 
     try {
-        jwt.verify(token, process.env.JWT_PRIVATE_KEY!)
+        jwt.verify(token, jwtSecret)
         return NextResponse.next()
-    } catch (err) {
-        const redirectUrl = new URL("/auth", req.nextUrl)
-        redirectUrl.searchParams.set("callbackPath", encodeURIComponent(path))
-        return NextResponse.redirect(redirectUrl)
+    } catch {
+        return redirectToAuth(req, path)
     }
 }
 
+function redirectToAuth(req: NextRequest, path: string) {
+    const redirectUrl = new URL("/auth", req.nextUrl)
+    redirectUrl.searchParams.set("callbackPath", path)
+    return NextResponse.redirect(redirectUrl)
+}
+
 export const config = {
-    matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+    matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)"],
 }

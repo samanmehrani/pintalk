@@ -26,8 +26,8 @@ model User {
   created_at        DateTime  @default(now())
   updated_at        DateTime?
 
-  posts      Post[]
-  products   Product[]
+  posts             Post[]
+  products          Product[]
   notificationsSent Notification[] @relation("Sender")
 }
 
@@ -63,7 +63,7 @@ model Product {
   created_at   DateTime @default(now())
 
   producer     User     @relation(fields: [producer_id], references: [id])
-  notifications Notification[] 
+  notifications Notification[]
 }
 
 // ───────────── Post ─────────────

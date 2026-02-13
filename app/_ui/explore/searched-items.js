@@ -150,7 +150,7 @@ export default function SearchedItems({ open, setOpen, filter }) {
                             className="group relative text-xs grid grid-cols-4 p-2 rounded-xl cursor-pointer active:bg-gray-400/25 lg:hover:bg-gray-400/25"
                           >
                             <div
-                              onClick={() => router.push('/products/' + window.btoa(product._id))}
+                              onClick={() => router.push('/products/' + window.btoa(product.id))}
                               className="relative aspect-square w-full select-none bg-gray-200 rounded-xl cursor-pointer overflow-hidden"
                             >
                               <Image

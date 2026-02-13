@@ -58,7 +58,7 @@ export default function ProductsTab({ user }) {
   }
 
   const handleDelete = (productId) => {
-    setProducts(prev => prev.filter(p => p._id !== productId))
+    setProducts(prev => prev.filter(p => p.id !== productId))
   }
 
   return (
