@@ -1,37 +1,36 @@
 import { NextResponse } from "next/server"
-import { User } from "../../../../lib/models/users"
+import prisma from "../../../../lib/prisma"
 import { auth } from "../../../../lib/middlewares/auth"
 
 export const GET = auth(async () => {
-  const users = await User.aggregate([
-    { $project: { name: 1, username: 1, profilePicture: 1 } },
-    {
-      $lookup: {
-        from: "posts",
-        localField: "_id",
-        foreignField: "author_id",
-        as: "posts",
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        profilePicture: true,
+        posts: { select: { id: true } },
+        products: { select: { id: true } },
+        created_at: true,
       },
-    },
-    {
-      $lookup: {
-        from: "products",
-        localField: "_id",
-        foreignField: "producer_id",
-        as: "products",
-      },
-    },
-    {
-      $project: {
-        name: 1,
-        username: 1,
-        profilePicture: 1,
-        postCount: { $size: "$posts" },
-        productCount: { $size: "$products" },
-      },
-    },
-    { $sort: { created_at: -1 } },
-  ])
+      orderBy: { created_at: "desc" },
+    })
 
-  return NextResponse.json(users)
+    const result = users.map((user) => ({
+      name: user.name,
+      username: user.username,
+      profilePicture: user.profilePicture,
+      postCount: user.posts.length,
+      productCount: user.products.length,
+    }))
+
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error("GET /api/users summary error:", error)
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    )
+  }
 })

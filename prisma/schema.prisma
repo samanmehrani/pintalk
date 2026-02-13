@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────── User ─────────────
+model User {
+  id                String    @id @map("_id") @default(auto()) @db.ObjectId
+  name              String?
+  username          String    @unique
+  email             String    @unique
+  profilePicture    String?
+  userType          String?
+  founded           String?
+  industry          String?
+  bio               String?
+  location          String?
+  numberOfLocations String?
+  link              String?
+  status            Int       @default(0)
+  isAdmin           Boolean   @default(false)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime?
+
+  posts      Post[]
+  products   Product[]
+  notificationsSent Notification[] @relation("Sender")
+}
+
+// ───────────── VerificationCode ─────────────
+model VerificationCode {
+  id             String   @id @map("_id") @default(auto()) @db.ObjectId
+  email          String?
+  code           String
+  failed_attempts Int      @default(0)
+  created_at     DateTime @default(now())
+}
+
+// ───────────── Product ─────────────
+model Product {
+  id           String   @id @map("_id") @default(auto()) @db.ObjectId
+  producer_id  String   @db.ObjectId
+  name         String?
+  price        String?
+  label        String?
+  details      Json?
+  hscode       String?
+  currency     String?
+  country      String?
+  region       String?
+  type         String?
+  description  String?
+  productType  String?
+  count        Int      @default(0)
+  rating       Float?
+  images       Json?
+  colors       Json?
+  status       Int?
+  created_at   DateTime @default(now())
+
+  producer     User     @relation(fields: [producer_id], references: [id])
+  notifications Notification[] 
+}
+
+// ───────────── Post ─────────────
+model Post {
+  id         String   @id @map("_id") @default(auto()) @db.ObjectId
+  author_id  String   @db.ObjectId
+  text       String?
+  label      String?
+  created_at DateTime @default(now())
+  updated_at DateTime?
+
+  author     User @relation(fields: [author_id], references: [id])
+}
+
+// ───────────── Notification ─────────────
+model Notification {
+  id              String   @id @map("_id") @default(auto()) @db.ObjectId
+  sender          String   @db.ObjectId
+  sender_name     String?
+  sender_username String?
+  recever         String
+  message         String?
+  status          Int?
+  product         String   @db.ObjectId
+  created_at      DateTime @default(now())
+  updated_at      DateTime?
+
+  senderUser  User    @relation("Sender", fields: [sender], references: [id])
+  productRef  Product @relation(fields: [product], references: [id])
+}

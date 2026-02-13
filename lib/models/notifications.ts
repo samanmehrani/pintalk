@@ -1,28 +1,9 @@
-import mongoose, { Schema, Document, Model, model } from "mongoose"
+import prisma from "../prisma"
 
-export interface INotification extends Document {
-  sender: mongoose.Schema.Types.ObjectId
-  sender_name?: string
-  sender_username?: string
-  recever: string
-  message?: string
-  status?: number
-  product: mongoose.Schema.Types.ObjectId
-  created_at: Date
-  updated_at?: Date
+export const Notification = {
+  find: (query: any) => prisma.notification.findMany({ where: query }),
+  findById: (id: string) => prisma.notification.findUnique({ where: { id } }),
+  create: (data: any) => prisma.notification.create({ data }),
+  findByIdAndUpdate: (id: string, data: any) => prisma.notification.update({ where: { id }, data }),
+  findByIdAndDelete: (id: string) => prisma.notification.delete({ where: { id } }),
 }
-
-const notificationSchema = new Schema<INotification>({
-  sender: { type: mongoose.Schema.Types.ObjectId, index: true },
-  sender_name: { type: String },
-  sender_username: { type: String },
-  recever: { type: String },
-  message: { type: String },
-  status: { type: Number },
-  product: { type: mongoose.Schema.Types.ObjectId, index: true },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: null },
-})
-
-export const Notification: Model<INotification> =
-  mongoose.models.Notification || model<INotification>("Notification", notificationSchema)

@@ -1,5 +1,11 @@
-import type { NextConfig } from "next"
-import withPWA from 'next-pwa'
+import type { NextConfig } from "next";
+import withPWAInit from "next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+});
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -7,15 +13,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "10mb",
     },
   },
-}
+};
 
-withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-})
-
-export default {
-  ...withPWA,
-  ...nextConfig
-}
+export default withPWA(nextConfig);

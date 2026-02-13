@@ -1,20 +1,50 @@
 import { NextResponse } from "next/server"
-import { Product } from "../../../../../lib/models/products"
-import { User } from "../../../../../lib/models/users"
+import prisma from "../../../../../lib/prisma"
 
-export async function GET(_: Request, { params, searchParams }: { params: { userId: string }, searchParams: URLSearchParams }) {
-  const page = parseInt(searchParams.get("page") || "1")
-  const limit = 12
-  const skip = (page - 1) * limit
+interface GetProductsParams {
+  params: { userId: string }
+  searchParams: URLSearchParams
+}
 
-  const producer = await User.findOne({ username: params.userId })
-  if (!producer) return NextResponse.json({ message: "User not found." }, { status: 404 })
+export async function GET(
+  _: Request,
+  { params, searchParams }: GetProductsParams
+) {
+  try {
+    const page = Number(searchParams.get("page") || "1")
+    const limit = 12
+    const skip = (page - 1) * limit
 
-  const products = await Product.find({ producer_id: producer._id })
-    .populate("producer_id", "name username profilePicture -_id")
-    .sort({ created_at: -1 })
-    .skip(skip)
-    .limit(limit)
+    const producer = await prisma.user.findUnique({
+      where: { username: params.userId },
+      select: { id: true, name: true, username: true, profilePicture: true },
+    })
 
-  return NextResponse.json(products)
+    if (!producer) {
+      return NextResponse.json(
+        { message: "User not found." },
+        { status: 404 }
+      )
+    }
+
+    const products = await prisma.product.findMany({
+      where: { producer_id: producer.id },
+      include: {
+        producer: {
+          select: { name: true, username: true, profilePicture: true },
+        },
+      },
+      orderBy: { created_at: "desc" },
+      skip,
+      take: limit,
+    })
+
+    return NextResponse.json(products)
+  } catch (error) {
+    console.error("GET /api/products/user error:", error)
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    )
+  }
 }

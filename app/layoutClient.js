@@ -1,5 +1,7 @@
 'use client'
 
+import "@/app/_ui/globals.css"
+
 import { useEffect, useState } from 'react'
 
 import Navbar from '@/app/_ui/navbar'

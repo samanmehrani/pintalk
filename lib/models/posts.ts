@@ -1,19 +1,9 @@
-import mongoose, { Schema, Document, Model, model } from "mongoose"
+import prisma from "../prisma"
 
-export interface IPost extends Document {
-  author_id: mongoose.Schema.Types.ObjectId
-  text?: string
-  label?: string
-  created_at: Date
-  updated_at?: Date
+export const Post = {
+  find: (query: any) => prisma.post.findMany({ where: query }),
+  findById: (id: string) => prisma.post.findUnique({ where: { id } }),
+  create: (data: any) => prisma.post.create({ data }),
+  findByIdAndUpdate: (id: string, data: any) => prisma.post.update({ where: { id }, data }),
+  findByIdAndDelete: (id: string) => prisma.post.delete({ where: { id } }),
 }
-
-const postSchema = new Schema<IPost>({
-  author_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  text: { type: String, minlength: 1, maxlength: 1000 },
-  label: { type: String },
-  created_at: { type: Date, default: Date.now },
-  updated_at: { type: Date, default: null },
-})
-
-export const Post: Model<IPost> = mongoose.models.Post || model<IPost>("Post", postSchema)

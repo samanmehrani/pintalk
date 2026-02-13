@@ -1,14 +1,44 @@
 import { NextResponse } from "next/server"
-import mongoose from "mongoose"
-import { Product } from "../../../../../lib/models/products"
+import prisma from "../../../../../lib/prisma"
 
-export async function GET(_: Request, { params }: { params: { productId: string } }) {
-  if (!mongoose.Types.ObjectId.isValid(params.productId)) {
-    return NextResponse.json({ message: "Invalid product ID format." }, { status: 400 })
+interface GetProductParams {
+  params: { productId: string }
+}
+
+export async function GET(
+  _: Request,
+  { params }: GetProductParams
+) {
+  try {
+    if (!params.productId) {
+      return NextResponse.json(
+        { message: "Product ID is required." },
+        { status: 400 }
+      )
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: params.productId },
+      include: {
+        producer: {
+          select: { name: true, username: true, profilePicture: true },
+        },
+      },
+    })
+
+    if (!product) {
+      return NextResponse.json(
+        { message: "Product not found." },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(product)
+  } catch (error) {
+    console.error("GET /api/products/[productId] error:", error)
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    )
   }
-
-  const product = await Product.findById(params.productId)
-    .populate("producer_id", "name username profilePicture -_id")
-
-  return NextResponse.json(product)
 }

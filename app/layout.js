@@ -1,8 +1,4 @@
-import "@/app/_ui/globals.css"
-
 import * as texts from '@/app/_text/common.js'
-
-import { connectMongo } from "@/lib/config/mongoose"
 
 // import { vazirmatn } from "./fonts"
 import ClientLayout from './layoutClient'
@@ -24,7 +20,6 @@ export const viewport = {
 }
 
 export default async function RootLayout({ children }) {
-  await connectMongo()
   return (
     <html lang="en">
       <head>

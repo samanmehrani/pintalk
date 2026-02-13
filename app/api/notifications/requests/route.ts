@@ -1,26 +1,62 @@
 import { NextRequest, NextResponse } from "next/server"
+import prisma from "../../../../lib/prisma"
 import { auth, JwtPayload } from "../../../../lib/middlewares/auth"
-import { Notification } from "../../../../lib/models/notifications"
 
-export const GET = auth(async (req: NextRequest & { user: JwtPayload }) => {
-  const url = new URL(req.url)
-  const page = parseInt(url.searchParams.get("page") || "1")
-  const limit = 20
-  const skip = (page - 1) * limit
+type AuthRequest = NextRequest & { user: JwtPayload }
 
-  const requests = await Notification.find({ sender: req.user._id })
-    .sort({ _id: -1 })
-    .skip(skip)
-    .limit(limit)
+export const GET = auth(async (req: AuthRequest) => {
+  try {
+    const url = new URL(req.url)
+    const page = Number(url.searchParams.get("page") || "1")
+    const limit = 20
+    const skip = (page - 1) * limit
 
-  return NextResponse.json(requests)
+    const notifications = await prisma.notification.findMany({
+      where: { sender: req.user.userId },
+      orderBy: { created_at: "desc" },
+      skip,
+      take: limit,
+    })
+
+    return NextResponse.json(notifications)
+  } catch (error) {
+    console.error("GET /api/notifications/sent error:", error)
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    )
+  }
 })
 
-export const DELETE = auth(async (req: NextRequest) => {
-  const { requestId } = await req.json()
+export const DELETE = auth(async (req: AuthRequest) => {
+  try {
+    const { requestId } = await req.json()
 
-  const notification = await Notification.findByIdAndDelete(requestId)
-  return notification
-    ? NextResponse.json(null, { status: 200 })
-    : NextResponse.json(null, { status: 404 })
+    if (!requestId) {
+      return NextResponse.json(
+        { message: "requestId is required." },
+        { status: 400 }
+      )
+    }
+
+    const notification = await prisma.notification.delete({
+      where: { id: requestId },
+    })
+
+    return NextResponse.json(notification, { status: 200 })
+  } catch (error) {
+    console.error("DELETE /api/notifications/sent error:", error)
+
+    if (error instanceof Error && error.message.includes("Record to delete not found")) {
+      return NextResponse.json(
+        { message: "Notification not found." },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    )
+  }
 })
